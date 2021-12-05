@@ -149,7 +149,10 @@ $(document).ready(function () {
 
     const errorElem = $("[id*='error']");
     const helpElem = $("[id*='help']");
+
+    // Clear errors
     errorElem.attr("style", "display: none;");
+    errorElem.toArray().forEach(elem => { elem.innerText = ""; });
 
     const result = await fetch(url, {
       method: "POST", body: $("#calculationform").serialize(), headers: {
@@ -162,8 +165,11 @@ $(document).ready(function () {
       const data = await result.json();
       if (typeof data == "object" && data.error) {
         delete data.error;
-        const errorMessage = Object.values(data).join("\n");
-        errorElem[0].innerText = errorMessage;
+        // Assign each error to the appropriate field
+        errorElem.toArray().forEach(element => {
+          const fieldName = /.*(?=error)/.exec(element.id)?.[0] ?? "";
+          if (typeof data[fieldName] === "string") element.innerText = data[fieldName];
+        });
         errorElem.removeAttr("style");
         helpElem.attr("style", "display: none;")
         return;

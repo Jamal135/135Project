@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         window.scrollTo(0, parseInt(scrollpos));
 });
 window.onbeforeunload = function (e) {
-    localStorage.setItem("scrollpos", "" + window.scrollY);
+    localStorage.setItem("scrollpos", "".concat(window.scrollY));
 };
 // Website Themes
 var themes = {
@@ -173,7 +173,7 @@ $(document).ready(function () {
     });
     if (form)
         form.onsubmit = function (e) { return __awaiter(_this, void 0, void 0, function () {
-            var url, targetFormInputElems, targetFormInputs, errorElem, helpElem, result, data, errorMessage, outputtext, resultcard;
+            var url, targetFormInputElems, targetFormInputs, errorElem, helpElem, result, data_1, outputtext, resultcard;
             var _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -200,7 +200,9 @@ $(document).ready(function () {
                         }, {});
                         errorElem = $("[id*='error']");
                         helpElem = $("[id*='help']");
+                        // Clear errors
                         errorElem.attr("style", "display: none;");
+                        errorElem.toArray().forEach(function (elem) { elem.innerText = ""; });
                         return [4 /*yield*/, fetch(url, {
                                 method: "POST", body: $("#calculationform").serialize(), headers: {
                                     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
@@ -211,35 +213,40 @@ $(document).ready(function () {
                         if (!result.ok) return [3 /*break*/, 3];
                         return [4 /*yield*/, result.json()];
                     case 2:
-                        data = _b.sent();
-                        if (typeof data == "object" && data.error) {
-                            delete data.error;
-                            errorMessage = Object.values(data).join("\n");
-                            errorElem[0].innerText = errorMessage;
+                        data_1 = _b.sent();
+                        if (typeof data_1 == "object" && data_1.error) {
+                            delete data_1.error;
+                            // Assign each error to the appropriate field
+                            errorElem.toArray().forEach(function (element) {
+                                var _a, _b;
+                                var fieldName = (_b = (_a = /.*(?=error)/.exec(element.id)) === null || _a === void 0 ? void 0 : _a[0]) !== null && _b !== void 0 ? _b : "";
+                                if (typeof data_1[fieldName] === "string")
+                                    element.innerText = data_1[fieldName];
+                            });
                             errorElem.removeAttr("style");
                             helpElem.attr("style", "display: none;");
                             return [2 /*return*/];
                         }
                         outputtext = $("#outputtext");
-                        if (data instanceof Array) {
-                            outputtext.val(data.join("|"));
+                        if (data_1 instanceof Array) {
+                            outputtext.val(data_1.join("|"));
                         }
-                        else if (typeof data === "object") {
+                        else if (typeof data_1 === "object") {
                             outputtext.val(Object
-                                .entries(data)
+                                .entries(data_1)
                                 .map(function (_a) {
                                 var key = _a[0], value = _a[1];
-                                return "key: " + key + ", value: " + value;
+                                return "key: ".concat(key, ", value: ").concat(value);
                             })
                                 .join("|"));
                         }
                         else {
-                            outputtext.val("" + data);
+                            outputtext.val("".concat(data_1));
                         }
                         $("[id*='help']").removeAttr("style");
                         resultcard = $(".resultcard");
                         resultcard.removeAttr("style");
-                        if (data !== "Process Execution Failed")
+                        if (data_1 !== "Process Execution Failed")
                             outputtext.removeClass("text-danger");
                         else {
                             outputtext.addClass("text-danger");
